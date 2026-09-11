@@ -1,0 +1,10 @@
+nflreadpy
+polars
+pathlib
+mlflow
+seaborn
+xgboost
+uvicorn
+pytest
+
+# Also requires libomp. Install using 'brew install libomp'
