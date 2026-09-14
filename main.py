@@ -119,7 +119,7 @@ def predict(matchup: Matchup):
     key = (matchup.season, matchup.week, matchup.home_team, matchup.away_team)
     try:
         row = features_df.loc[key]
-    except KeyError:
+    except (KeyError, NameError):
         raise HTTPException(
             status_code=404,
             detail=f"No features found for {matchup.away_team} @ {matchup.home_team}, "
