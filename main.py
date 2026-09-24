@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 import xgboost as xgb
 import numpy as np
 import pandas as pd
+import nflreadpy as nfl
 
 app = FastAPI(title="NFL Pred API", version="0.1.0")
 
@@ -104,12 +105,26 @@ class PredictionResponse(BaseModel):
     edge: float
     value_flag: bool
 
+class GameResponse(BaseModel):
+    away_team: str
+    home_team: str
+    gamedate = str
+    gametime = str
+
 
 @app.get("/health")
 def health():
     if not MODEL_LOADED:
         raise HTTPException(status_code=503, detail=f"Model failed to load: {MODEL_LOAD_ERROR}")
     return {"status": "ok", "model_loaded": True}
+
+@app.get("/games")
+async def games(year) -> list[GameResponse]:
+    sched = nfl.load_schedules([nfl.get_current_season()]).to_pandas()
+    return [
+        GameResponse(away_team=game.away_team, home_team = game.home_team, gamedate = game.gameday, gametime = game.gametime) for game in sched.itertuples()
+    ]
+
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(matchup: Matchup):
