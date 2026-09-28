@@ -6,5 +6,6 @@ seaborn
 xgboost
 uvicorn
 pytest
+streamlit
 
 # Also requires libomp. Install using 'brew install libomp'

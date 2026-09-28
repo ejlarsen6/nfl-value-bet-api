@@ -106,10 +106,12 @@ class PredictionResponse(BaseModel):
     value_flag: bool
 
 class GameResponse(BaseModel):
+    season: int
+    week: int
     away_team: str
     home_team: str
-    gamedate = str
-    gametime = str
+    gamedate: str
+    gametime: str
 
 
 @app.get("/health")
@@ -119,12 +121,12 @@ def health():
     return {"status": "ok", "model_loaded": True}
 
 @app.get("/games")
-async def games(year) -> list[GameResponse]:
+async def games() -> list[GameResponse]:
     sched = nfl.load_schedules([nfl.get_current_season()]).to_pandas()
+    current_week = nfl.get_current_week()
     return [
-        GameResponse(away_team=game.away_team, home_team = game.home_team, gamedate = game.gameday, gametime = game.gametime) for game in sched.itertuples()
+        GameResponse(season =game.season, week = game.week, away_team=game.away_team, home_team = game.home_team, gamedate = game.gameday, gametime = game.gametime) for game in sched.itertuples() if game.week >= current_week
     ]
-
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(matchup: Matchup):
