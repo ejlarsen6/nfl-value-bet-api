@@ -134,7 +134,7 @@ def debug_lookup(season: int, week: int, home_team: str, away_team: str):
     Reproduces the exact lookup /predict does, but returns full diagnostic
     detail instead of a bare 404, so this can be tested without shell access."""
     if not FEATURES_LOADED:
-        raise HTTPException(status_code=503, detail="Feature table not loaded")
+        raise HTTPException(status_code=503, detail=f"Feature table not loaded: {FEATURES_LOAD_ERROR}")
  
     key = (season, week, home_team, away_team)
     result = {
