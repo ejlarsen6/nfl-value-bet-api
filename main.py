@@ -9,7 +9,7 @@ app = FastAPI(title="NFL Pred API", version="0.1.0")
 
 VALUE_THRESHOLD = 0.05
 MODEL_PATH = 'model_v1.json'
-FEATURES_PATH = '../data/current_features.parquet'
+FEATURES_PATH = '/data/current_features.parquet'
 MODEL_FEATURE_COLS = [
 'home_passing_epa_per_play_roll3',
  'home_passing_epa_per_play_roll8',
