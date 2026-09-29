@@ -128,6 +128,38 @@ async def games() -> list[GameResponse]:
         GameResponse(season =game.season, week = game.week, away_team=game.away_team, home_team = game.home_team, gamedate = game.gameday, gametime = game.gametime) for game in sched.itertuples() if game.week >= current_week
     ]
 
+@app.get("/debug/lookup")
+def debug_lookup(season: int, week: int, home_team: str, away_team: str):
+    """TEMPORARY diagnostic endpoint -- remove once the lookup bug is found.
+    Reproduces the exact lookup /predict does, but returns full diagnostic
+    detail instead of a bare 404, so this can be tested without shell access."""
+    if not FEATURES_LOADED:
+        raise HTTPException(status_code=503, detail="Feature table not loaded")
+ 
+    key = (season, week, home_team, away_team)
+    result = {
+        "requested_key": {"season": season, "week": week, "home_team": home_team, "away_team": away_team},
+        "requested_key_types": [str(type(k)) for k in key],
+        "index_level_dtypes": {str(name): str(dtype) for name, dtype in zip(features_df.index.names, features_df.index.dtypes)},
+        "index_has_duplicates": bool(features_df.index.duplicated().any()),
+    }
+ 
+    close_matches = [
+        {"season": idx[0], "week": idx[1], "home_team": idx[2], "away_team": idx[3],
+         "types": [str(type(v)) for v in idx]}
+        for idx in features_df.index if idx[0] == season and idx[1] == week
+    ]
+    result["rows_with_matching_season_week"] = close_matches
+ 
+    try:
+        row = features_df.loc[key]
+        result["lookup_succeeded"] = True
+    except KeyError as e:
+        result["lookup_succeeded"] = False
+        result["key_error"] = str(e)
+ 
+    return result
+
 @app.post("/predict", response_model=PredictionResponse)
 def predict(matchup: Matchup):
     if not MODEL_LOADED:

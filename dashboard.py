@@ -40,7 +40,7 @@ def fetch_prediction(season, week, home_team, away_team):
     resp = requests.post(
         f"{API_BASE_URL}/predict",
         json={"season": season, "week": week, "home_team": home_team, "away_team": away_team},
-        timeout=10,
+        timeout=20,
     )
     resp.raise_for_status()
     return resp.json()
@@ -58,8 +58,10 @@ if not games:
 
 rows = []
 for g in games:
+    print(g, type(g))
     try:
         pred = fetch_prediction(g["season"], g["week"], g["home_team"], g["away_team"])
+        print(pred)
         rows.append({
             "Matchup": f"{g['away_team']} @ {g['home_team']}",
             "Week": g["week"],
