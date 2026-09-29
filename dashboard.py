@@ -14,7 +14,7 @@ import pandas as pd
 import requests
 
 # Point this at your live Render URL once deployed.
-API_BASE_URL = st.secrets.get("API_BASE_URL", "http://127.0.0.1:8000/games")
+API_BASE_URL = st.secrets.get("API_BASE_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(page_title="NFL Value-Bet Dashboard", layout="wide")
 
@@ -32,7 +32,7 @@ st.warning(
 def fetch_games():
     resp = requests.get(f"{API_BASE_URL}/games", timeout=10)
     resp.raise_for_status()
-    return resp.json()["games"]
+    return resp.json()
 
 
 @st.cache_data(ttl=300)
@@ -68,10 +68,12 @@ for g in games:
             "Edge": pred["edge"],
             "Value Flag": "🔥 Value" if pred["value_flag"] else "",
         })
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        st.error(f"Request Error: {e}")
         continue  # skip games the API couldn't score, rather than crashing the whole dashboard
 
 df = pd.DataFrame(rows)
+print(len(df), df.columns)
 df["Abs Edge"] = df["Edge"].abs()
 df = df.sort_values("Abs Edge", ascending=False).drop(columns="Abs Edge")
 

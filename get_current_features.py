@@ -207,10 +207,6 @@ def main(current_season: int, historical_seasons: list[int]):
     odds["home_team_abbr"] = odds["home_team_full"].map(ODDS_API_TO_NFLVERSE)
     odds["away_team_abbr"] = odds["away_team_full"].map(ODDS_API_TO_NFLVERSE)
 
-    # TODO: join `features` (polars, nflverse abbreviations) to `odds`
-    # (pandas, full team names) via a team-name mapping table -- this is
-    # the piece that needs the 32-team lookup mentioned above.
-
     features_pd = features.to_pandas()
 
     final = features_pd.merge(odds, left_on=["home_team", "away_team"], right_on=["home_team_abbr", "away_team_abbr"], how="left").drop(columns = ["home_team_abbr", "away_team_abbr"])
